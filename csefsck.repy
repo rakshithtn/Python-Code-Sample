@@ -1,0 +1,162 @@
+#!/usr/bin/python
+
+#Rakshith Tumkur Nagabhushana
+#0525670
+#File system checker
+
+import time;
+import os;
+
+################
+#Check for DeviceId
+################
+
+pathss = '/home/rakshith/all_lind_files'
+flag=0
+#filename='linddata.0'
+#f_name=os.path.join(pathss,filename)
+fo= open("linddata.0","r")
+for line in fo:
+ if '\'devId\':20' in line:
+  flag=1
+if flag==1:
+ print 'DevId is correct'
+else:
+ print 'DevId is incorrect'
+fo.close()
+
+##################
+#Check for time
+##################
+ticks=time.time()
+fo=open("linddata.0","r")
+for line in fo:
+ fields=line.strip().split()
+ x= fields[0]
+fo.close()
+y=x.strip(',').split(':')
+k=y[1]
+#print y[0]
+if y[0]=='\'creationtime\'':
+# print 'hiiiiiiiiiiiiiii'
+#ticks=time.time()
+#print ticks
+#print k
+ if (ticks > float(k)):
+  print "creation time is correct"
+ else:
+  print "incorrect creation time noticed"
+
+for filename in os.listdir(pathss):
+ infilename=os.path.join(pathss,filename)
+ #print infilename
+ i=open(infilename,"r")
+ for line in i:
+  fields=line.strip().split()
+  x=fields[0]
+  y=x.strip(',').split(':')
+  a=fields[7]
+  b=a.strip(',').split(':')
+  p=fields[4]
+  q=fields[5]
+  r=fields[6] 
+  m=p.strip(',').split(':')
+  n=q.strip(',').split(':')
+  o=r.strip(',').split(':')
+  d=b[1]
+  e=m[1]
+  f=n[1]
+  g=o[1]
+  if(y[0]=='\'size\''):
+   if (b[0]=='\'linkcount\''):
+    if (ticks > float (e) and ticks > float(f) and ticks > float (g)):
+     print "all times are correct in directories"
+    else:
+     print "incorrect time noticed in directories"
+   elif (b[0] == '\'mtime\''):
+    if(ticks > float(d) and ticks > float(e) and ticks > float (f)):
+     print "all times are correct in files"
+    else:
+     print "incorrect time noticed files"
+   else:
+    continue
+  else:
+   continue
+ i.close()
+
+##################
+#Free block list validation
+#################
+path1='/home/rakshith/all_lind_files/freeblocksfrom1to25'
+count=0
+for filename in os.listdir(path1):
+ in_filename=os.path.join(path1,filename)
+ j=open(in_filename,"r")
+ for lines in j:
+  count=count+1
+if count == 9973:
+ print "Free blocks list contains ALL of the free blocks and there are no files/dir stored on these"
+else:
+ print "Error noticed in free block list"
+
+####################
+#checking linkcount and count in filename_to_inode_dict
+###################
+
+
+for file_name in os.listdir(pathss):
+ infile_name=os.path.join(pathss,file_name)
+ i=open(infile_name,"r")
+ for line in i:
+  field=line.strip().split()
+  x=field[0]
+  y=x.strip(',').split(':')
+  a=field[7]
+  b=a.strip(',').split(':')
+  if(y[0]=='\'size\''):
+   if (b[0]=='\'linkcount\''):
+    c=field[8]
+    z=c.split('{')
+    w=len(z)
+    m=a.strip(',').split(':')
+    if(float(m[1]) == float(w-1)):
+     print "Directory's link count matches the number of links in filename_to_inode_dict"
+    else:
+     print "Mismatch in directory's link count and number of links in filename_to_inode_dict"
+   else:
+    continue
+  else:
+   continue
+ i.close()
+
+################
+#Indirect =0 check where the data in location pointer is array
+################
+paths1='/home/rakshith/all_lind_files/'
+flag1=0
+for file_name1 in os.listdir(pathss):
+ in_file_name1=os.path.join(pathss,file_name1)
+ p=open(in_file_name1,"r")
+ for line in p:
+  field1=line.strip().split()
+  a=field1[4]
+  b=a.strip(',').split(':')
+  x=field1[0]
+  y=x.strip(',').split(':')
+  m=field1[8]
+  n=m.split(':')
+  q=field1[9]
+  r=q.split(':')
+  x= 'linddata.'+r[1]
+  j=paths1+x
+  if(y[0]=='\'size\''):
+   if (b[0]=='\'linkcount\''):
+    t=open(j,"r")
+    for line2 in t:
+     if 'linddata' in line2:
+      flag1=1
+  if(n[1] and flag1==1):
+   print "Indirect is 0 and data in the location pointer is array"
+  else:
+   print "Error: Indirect and data in location pointer mismatch"
+ p.close()
